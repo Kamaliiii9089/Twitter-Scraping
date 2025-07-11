@@ -15,17 +15,34 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://twitter-scraping-vsjm.vercel.app'
+];
+
+// Configure Socket.IO with CORS
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware for REST API CORS
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Serve static files only if dist folder exists
@@ -154,7 +171,7 @@ app.post('/api/stop', async (req, res) => {
 // Serve React app
 app.get('*', (req, res) => {
   const indexPath = path.join(__dirname, '../client/dist/index.html');
-  if (require('fs').existsSync(indexPath)) {
+  if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
     res.status(404).json({ 
