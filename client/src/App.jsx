@@ -17,7 +17,7 @@ function App() {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io('http://localhost:3001');
+    const newSocket = io('https://twitter-scraping-dwt2.onrender.com');
     setSocket(newSocket);
 
     // Socket event listeners
